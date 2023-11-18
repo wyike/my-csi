@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: my-csi
+  name: my-csi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-csi
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: my-csi
+    spec:
+      serviceAccountName: my-csi-sa
+      containers:
+      - image: registry.k8s.io/sig-storage/csi-provisioner:v3.6.2
+        name: external-provisioner
+        args:
+        - "--csi-address=$(CSI_ENDPOINT)"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+        volumeMounts:
+        - mountPath: /var/lib/csi/sockets/pluginproxy
+          name: domain-socket
+      - image: registry.k8s.io/sig-storage/csi-attacher:v4.4.2
+        name: external-attacher
+        args:
+          - "--csi-address=$(CSI_ENDPOINT)"
+          - "-v=6"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+        volumeMounts:
+        - mountPath: /var/lib/csi/sockets/pluginproxy
+          name: domain-socket
+      - image: wyike/my-csi:1.1.0
+        name: controller-plugin
+        resources: {}
+        args:
+        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--vc-host=$(VC_HOST)"
+        - "--vc-user=$(VC_USER)"
+        - "--vc-password=$(VC_PASSWORD)"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
+        - name: VC_HOST
+          value: 8.9.10.11
+        - name: VC_USER
+          value: acutie
+        - name: VC_PASSWORD
+          value: iwontletyouknow
+        volumeMounts:
+        - mountPath: /var/lib/csi/sockets/pluginproxy
+          name: domain-socket
+      volumes:
+      - name: domain-socket
+        emptyDir: {}
+status: {}

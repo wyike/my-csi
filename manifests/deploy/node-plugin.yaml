@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-plugin
+spec:
+  selector:
+    matchLabels:
+      name: node-plugin
+  template:
+    metadata:
+      labels:
+        name: node-plugin
+    spec:
+      volumes:
+      - name: kubelet-registration-socket
+        hostPath:
+          path: /var/lib/kubelet/plugins_registry/
+          type: DirectoryOrCreate
+      - name: plugin-socket
+        hostPath:
+          path: /var/lib/kubelet/plugins/my-csi/
+          type: DirectoryOrCreate
+      - name: source-device-dir
+        hostPath:
+          path: /dev
+      - name: mountpoint-dir
+        hostPath:
+          path: /var/lib/kubelet
+      containers:
+      - name: csi-driver-registrar
+        image: registry.k8s.io/sig-storage/csi-node-driver-registrar:v2.9.1
+        args:
+          - "--csi-address=$(CSI_ENDPOINT)"
+          - "--kubelet-registration-path=/var/lib/kubelet/plugins/my-csi/csi.sock"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi.sock
+        volumeMounts:
+        - name: plugin-socket
+          mountPath: /csi
+        - name: kubelet-registration-socket
+          mountPath: /registration
+      - name: node-plugin
+        image: wyike/my-csi:1.1.0
+        args:
+        - "--endpoint=$(CSI_ENDPOINT)"
+        - "--node-plugin=true"
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi.sock
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: plugin-socket
+          mountPath: /csi
+        - name: source-device-dir
+          mountPath: /dev
+        - name: mountpoint-dir
+          mountPath: /var/lib/kubelet
+          mountPropagation: "Bidirectional"
