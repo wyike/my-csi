@@ -44,7 +44,7 @@ func (*Driver) NodeStageVolume(ctx context.Context, req *csi.NodeStageVolumeRequ
 		return &csi.NodeStageVolumeResponse{}, nil
 	}
 
-	fmt.Printf("node staging mount volume: format and mount the volume ID %s", req.VolumeId)
+	fmt.Printf("node staging mount volume: format and mount the volume ID %s\n", req.VolumeId)
 
 	// determine file system type
 	fsType := "ext4"
@@ -122,7 +122,7 @@ func (*Driver) NodePublishVolume(ctx context.Context, req *csi.NodePublishVolume
 		return nil, status.Errorf(codes.Internal, "error mounting volume. err: %s", err.Error())
 	}
 
-	fmt.Printf("NodePublishVolume for %s successful to path %s", req.GetVolumeId(), target)
+	fmt.Printf("NodePublishVolume for %s successful to path %s\n", req.GetVolumeId(), target)
 
 	return &csi.NodePublishVolumeResponse{}, nil
 }
