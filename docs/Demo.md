@@ -149,3 +149,10 @@ controller plugin continues reporting:
 DeleteVolume of the controller service was called
 Volume: "f902fee8-f463-4260-a67f-f21fc320b0cb" deleted sucessfully
 ```
+
+
+#### Sample look of vsphere volume
+
+![volume](images/volume.jpg)
+
+One more vmdk of 1G will be attached to the VM

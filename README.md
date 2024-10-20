@@ -27,3 +27,4 @@ It's only a minimum implementation to make basic things work and learn to write 
 - Delete Pod
 - Delete PVC
 - Pod and PVC, PV can be deleted successfully
+Details please refer to [demo](https://github.com/wyike/my-csi/blob/main/docs/Demo.md)
